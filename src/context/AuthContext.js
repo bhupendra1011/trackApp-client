@@ -7,7 +7,7 @@ const authReducer = (state, action) => {
   switch (action.type) {
     case "add_error":
       return { ...state, errorMessage: action.payload };
-    case "signup":
+    case "signin":
       return { errorMessage: "", token: action.payload }; // on  new sign up rebuilding state object
     default:
       return {};
@@ -24,25 +24,44 @@ const signup = (dispatch) => {
       const response = await trackerApi.post("/signup", { email, password });
       await AsyncStorage.setItem("token", response.data.token);
       dispatch({
-        type: "signup",
+        type: "signin",
         payload: response.data.token,
       });
       navigate("TrackList");
     } catch (error) {
       dispatch({
         type: "add_error",
-        payload: "Something went woring with sign in ",
+        payload: "Something went woring with sign up ",
       });
       console.log(error);
     }
   };
 };
 
+const clearErrorMessage = (dispatch) => () => {
+  dispatch({ type: "clear_error_message" });
+};
+
 const signin = (dispatch) => {
-  return ({ email, password }) => {
+  return async ({ email, password }) => {
     // try to sign in
     // handle sucess by updating state
     // handle failure by showing error message
+    try {
+      const response = await trackerApi.post("/signin", { email, password });
+      await AsyncStorage.setItem("token", response.data.token);
+      dispatch({
+        type: "signin",
+        payload: response.data.token,
+      });
+      navigate("TrackList");
+    } catch (error) {
+      console.log(error);
+      dispatch({
+        type: "add_error",
+        payload: "Something went woring with sign in ",
+      });
+    }
   };
 };
 
@@ -60,6 +79,6 @@ const defaultValue = {
 
 export const { Provider, Context } = createDataContext(
   authReducer,
-  { signup, signin, signout },
+  { signup, signin, signout, clearErrorMessage },
   defaultValue
 );
