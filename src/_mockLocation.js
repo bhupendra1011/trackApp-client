@@ -17,9 +17,11 @@ const getLocation = (increment) => {
   };
 };
 
+let counter = 0;
 setInterval(() => {
   Location.EventEmitter.emit("Expo.locationChanged", {
     watchId: Location._getCurrentWatchId(),
-    location: getLocation(Math.floor(Math.random() * 1000)),
+    location: getLocation(counter),
   });
+  counter++;
 }, 1000);
